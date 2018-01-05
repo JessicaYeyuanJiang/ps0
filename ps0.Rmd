@@ -1,0 +1,244 @@
+---
+title: "ps0"
+author: "Jessica Jiang"
+date: "1/4/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##1 Setup
+### 1.1 Installation
+```{r my script, eval=FALSE, echo=TRUE}
+#4
+install.packages("devtools")
+#5
+devtools::install_github("hadley/r4ds")
+#6
+JessicaJiang
+#7
+JessicaYeyuanJiang
+#8
+list.of.packages <- c("tidyverse", # learn more at tidyverse.org
+                      "rmarkdown", # learn more at http://rmarkdown.rstudio.com
+                      "shiny", # learn more at http://shiny.rstudio.com
+                      "RMySQL", # for SQL server
+                      "dbplyr", # for SQL server
+                      "hexbin", # for geom_hex
+                      "statar", # for binscatter
+                      "readxl", # for reading excel files
+                      "haven", # for reading stata files
+                      "testthat", # for unit tests
+                      "RgoogleMaps") # for mapping
+#9
+install.packages(list.of.packages)
+
+#to test if the packages are installed
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
+```
+###1.2 Affirm Data Use Agreements
+See Canvas
+
+##2 R for Data Science Exercises
+I work with Pedro Liedo
+
+### 2.1 3.2.4
+1. Load the tidyverse library. Run ggplot(data = mpg). Write one sentence describing what happened
+```{r, echo=TRUE}
+library(tidyverse) 
+ggplot(data = mpg)
+```
+
+There is no output of any plot
+
+2. Data set mpg has 234 rows and 11 columns
+```{r, echo=TRUE}
+dim(mpg)
+```
+
+3. drv is a categorical variable that describes the type of the drive: f stands for front-wheel drive, r for rear wheel drive and 4 for four-wheel drive 
+```{r, echo=FALSE}
+?mpg
+```
+
+4.
+```{r, echo=TRUE}
+ggplot(mpg)+
+  geom_point(mapping = aes(x = hwy, y = cyl)) +
+  labs(x = "highway miles per gallon <hwy>",
+       y = "number of cylinders <cyl>")
+```
+
+5. Since both x and y are two categorical variables, points overlap and as a result, we can only see the combination of values. We can add density alpha to solve the problem.
+
+```{r, echo=TRUE}
+ggplot(data = mpg)+
+  geom_point(mapping = aes(x = class, y = drv)) +
+  labs(x = "type of car <class>",
+       y = "f = front-wheel drive, r = rear wheel drive, 4 = 4wd <drv>")
+```
+
+### 2.2 3.3.1
+
+1.What’s gone wrong with this code? Why are the points not blue?
+```{r, echo=FALSE}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, color="blue"))
+```
+
+In r, filling a color needs to be outside of aes( ). Because aes specifies the variables we want to plot, by putting the values inside aes(), we generate new variables and legends. The right way should be:
+```{r, echo=TRUE}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy), color="blue")
+```
+
+-or:
+```{r, echo=TRUE}
+ggplot(data = mpg,aes(x = displ, y = hwy)) +
+  geom_point(color="blue")
+```
+
+
+2.
+displ is the only continuous variable. *displ, year, cyl, cty*, and *hwy* are the continuous variables. Variables *manufacturer, model, trans, drv, fl*, and *class* are categorical.
+```{r, echo=TRUE}
+?mpg
+sapply(mpg, class)
+```
+
+From print() commend, variable type is shown below the variable. *displ, year, cyl, cty*, and *hwy* are the continuous variables. Variables *manufacturer, model, trans, drv, fl*, and *class* are categorical.
+```{r, echo=TRUE}
+print(mpg)
+```
+
+3.
+**Color Mapping**
+
+By mapping a **continuous variable**, drv, for example to color, data points are visualized on a spectrum, which means they are filled with different levels of brightness of the same color blue according to their value of dispel. Data points with higher displ values are filled with brighter blue while those with low displ values are filled with darker blue. By mapping a **categorical variable** displ to color, data points are filled with certain colors depending on the category of the data points. Point is pink if the value of drv is 4, green if f, and blue if r.
+
+```{r, echo=TRUE}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, color=drv)) #discrete var
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, color=displ)) #continuous var
+```
+
+**Size Mapping**
+
+When a **continuos variable** is mapped to size, the size of data points increases gradually when the value of the mapped variable increases. For **categorical variables**, the number of sizes of data points would be the number of categories.
+
+```{r, echo=TRUE}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, size=drv))   
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, size=displ))
+```
+
+**Shape Mapping**
+
+With a categorical variable, data points are plotted of diffrent shapes according to the value of the categorical variable, whereas a continuous variable cannot be mapped to shape
+
+```{r, echo=TRUE, error=TRUE}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, shape=drv))   
+
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, shape=displ))
+```  
+
+4.For discrete variables, all three aethetics are implemented and only one legend is generated which combines color, shape, and size. Data points that have the same value of the mapped variable, have the same shape, color, and size.
+
+```{r, echo=TRUE}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, color=drv, size=drv, shape=drv )) 
+```
+
+For continuous varibles, only color and size are implemented and there are two legends.
+
+```{r, echo=TRUE}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, color=displ, size=displ ))
+```
+
+5.
+A stroke aesthetic controls the border width of shapes 21-25.
+```{r, echo=TRUE}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy), stroke = 2, shape = 24, size = 6, color="red", fill="yellow")
+```
+
+6.
+R generates a temporary variable which is true is displ < 5 and false if displ > 5).By mapping a aethetic with a threshold, data points with the value True have the color blue, while data points with the value False have the color pink.
+
+```{r, echo=TRUE}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, color=displ < 5)) 
+```
+
+### 2.3 3.5.1
+
+1. R scatterplots data points on seperate facets by each value of variable displ
+```{r, echo=TRUE}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = drv, y = cyl)) +
+  facet_wrap(~displ)
+```
+
+2. R scatterplots on seperate facets by different combinations of two variables drv and cyl. It tells us if there are observations in certain combinations.
+```{r, echo=TRUE}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = drv, y = cyl)) +
+  facet_grid(drv ~ cyl)
+```
+
+3. facet_grid(drv ~ .) forms a matrix of panels defined by a row facetting variable drv with no dimension on the right-hand side, which is the column facet. It forms a three-by-one grid.
+```{r, echo=TRUE}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_grid(drv ~ .)
+```
+
+facet_grid(. ~ cyl) forms a matrix of panels defined by a column facetting variable cyl with no dimension on the left-hand side, which is the row facet. It forms a one-by-four grid.
+```{r, echo=TRUE}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_grid(. ~ cyl)
+```
+
+4.
+By using faceting, we can observe the trends and distribution of data points within each facet seperately. However, by seperating them into individual facets, it's hard to observe the overall trends. With large data sets, data points might overlap, and as a result, color aethetic might not work well.
+```{r, echo=TRUE}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_wrap(~ class, nrow = 2)
+
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, color=class)) 
+```
+
+5.
+**?nrow** returns the number of rows a facet plot has
+**?ncol** returns the number of columns a facet plot has
+**scales** determines if the scale is fixed, free, or free in one dimension
+**as.table** is true when facets are tablized with the highest value on the bottom-right, and false when facets are only plotted with highest values at the top-right.
+**drop** drops all factor levels that are used in the data if drop is true; otherwise it would keep all factor levels
+**dir** tells the directions. "h" stands for horizontal and "v" stands for vertical.
+
+ facet_grid( ) doesn't have nrow and ncol argument because rows and columns are decided by certain attributes of the faceting variables.
+```{r, echo=TRUE}
+?facet_wrap
+```
+
+
+6.
+when the variables have more levels, we would prefer the plot to be shown vertically because we would have more space this way. Horizontal plot can be compressed and hard to read.
+
+
+
+
+
+
+
